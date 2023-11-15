@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using System.Data;
 
 
-namespace DotNetSixApp.Controllers.Data
+namespace DotNetSixApp.Data
 {
     public class DataContext
     {
@@ -24,11 +24,16 @@ namespace DotNetSixApp.Controllers.Data
             IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
             return await connection.QuerySingleAsync<T>(sql);
         }
-        
+
         public async Task<bool> ExecuteSql<T>(string sql)
         {
             IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
             return await connection.ExecuteAsync(sql) > 0;
+        }
+        public async Task<int> ExecuteSqlWithRowCount<T>(string sql)
+        {
+            IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
+            return await connection.ExecuteAsync(sql);
         }
     }
 }

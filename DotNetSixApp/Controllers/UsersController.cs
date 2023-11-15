@@ -1,4 +1,5 @@
-﻿using DotNetSixApp.Controllers.Data;
+﻿using DotNetSixApp.Data;
+using DotNetSixApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
@@ -9,7 +10,7 @@ namespace DotNetSixApp.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
-        DataContext _config;
+        public DataContext _config;
 
         public UsersController(IConfiguration config)
         {
@@ -22,15 +23,23 @@ namespace DotNetSixApp.Controllers
         }
 
         [HttpGet]
-        public string[] UserGet(string User)
+        public async Task<IEnumerable<Users>> GetUser()
         {
-            return new string[]
-            {
-                "User1",
-                "User2",
-                User
-            };
+            string sql = "SELECT * FROM Users";
 
+            IEnumerable<Users> user =await _config.LoadData<Users>(sql);
+            return user;
         }
+
+        [HttpGet("GetUser/{userId}")]
+        public async Task<Users> GetUser(int userId)
+        {
+            string sql = "SELECT * FROM Users where UserId = " +userId;
+
+            Users user =await _config.LoadDataSingle<Users>(sql);
+            return user;
+        }
+
+     
     }
 }

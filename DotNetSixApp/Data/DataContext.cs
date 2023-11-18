@@ -25,10 +25,10 @@ namespace DotNetSixApp.Data
             return await connection.QuerySingleAsync<T>(sql);
         }
 
-        public bool ExecuteSql(string sql)
+        public async Task<bool> ExecuteSql(string sql)
         {
             IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
-            return connection.Execute(sql) > 0;
+            return await connection.ExecuteAsync(sql) > 0;
         }
         public async Task<int> ExecuteSqlWithRowCount<T>(string sql)
         {

@@ -32,15 +32,16 @@ namespace DotNetSixApp.Controllers
         }
 
         [HttpGet("GetUser/{userId}")]
-        public async Task<Users> GetUser(int userId)
+        public async Task<ActionResult<Users>> GetUser(int userId)
         {
-            string sql = "SELECT * FROM Users where UserId = " +userId;
 
-            Users user =await _config.LoadDataSingle<Users>(sql);
+            string sql = "SELECT * FROM Users where UserId = " + userId;
+            Users user = await _config.LoadDataSingle<Users>(sql);
             return user;
-        } 
+        }
+      
         [HttpPut("EitUser")]
-        public  IActionResult EitUser(Users users)
+        public async Task<IActionResult> EitUser(Users users)
         {
             string sql = @"Update Users
                         Set FirstName= '" + users.FirstName +
@@ -50,13 +51,13 @@ namespace DotNetSixApp.Controllers
                         "', Active = '" + users.Active +
                         "' where UserId = " + users.UserId;
 
-            if(_config.ExecuteSql(sql)) { return Ok(); }
+            if(await _config.ExecuteSql(sql)) { return Ok(); }
 
             throw new Exception("Fail Update new user");
         }
 
         [HttpPost("AddUser")]
-        public IActionResult AddUser(Users users)
+        public async Task<IActionResult> AddUser(Users users)
         {
             string sql = @"Insert into Users(
                         FirstName,
@@ -72,7 +73,17 @@ namespace DotNetSixApp.Controllers
                         "', '" + users.Active +
                         "')";
 
-            if (_config.ExecuteSql(sql)) { return Ok(); }
+            if (await _config.ExecuteSql(sql)) { return Ok(); }
+
+            throw new Exception("Fail Update new user");
+        }
+
+        [HttpDelete("DeleteUser/{userId}")]
+        public async Task<IActionResult> DeleteUser(int userId)
+        {
+            string sql = @"Delete from Users where UserId =" + userId;
+                       
+            if (await _config.ExecuteSql(sql)) { return Ok(); }
 
             throw new Exception("Fail Update new user");
         }

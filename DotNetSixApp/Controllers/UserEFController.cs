@@ -25,62 +25,63 @@ namespace DotNetSixApp.Controllers
             return user;
         }
 
-        //[HttpGet("GetUser/{userId}")]
-        //public async Task<ActionResult<Users>> GetUser(int userId)
-        //{
+        [HttpGet("GetUser/{userId}")]
+        public async Task<ActionResult<Users>> GetUser(int userId)
+        {
+           
+            Users user = await _config.Users.Where(x=>x.UserId == userId).FirstOrDefaultAsync<Users>();
+            if(user != null) { return user; }
+            throw new Exception("User Not Found");
+        }
 
-        //    string sql = "SELECT * FROM Users where UserId = " + userId;
-        //    Users user = await _config.LoadDataSingle<Users>(sql);
-        //    return user;
-        //}
+        [HttpPut("EitUser")]
+        public async Task<IActionResult> EitUser(Users users)
+        {
+            Users userDto = await _config.Users.Where(u=>u.UserId == users.UserId).FirstOrDefaultAsync();   
+           
+            if(userDto != null)
+            {
+                userDto.FirstName = users.FirstName;
+                userDto.LastName = users.LastName;
+                userDto.Gender = users.Gender;
+                userDto.Email = users.Email;
+                userDto.Active = users.Active;
 
-        //[HttpPut("EitUser")]
-        //public async Task<IActionResult> EitUser(Users users)
-        //{
-        //    string sql = @"Update Users
-        //                Set FirstName= '" + users.FirstName +
-        //                "', LastName= '" + users.LastName +
-        //                "', Email= '" + users.Email +
-        //                "', Gender= '" + users.Gender +
-        //                "', Active = '" + users.Active +
-        //                "' where UserId = " + users.UserId;
+                if(await _config.SaveChangesAsync()>0) { return Ok(); }
+                
+            }
 
-        //    if (await _config.ExecuteSql(sql)) { return Ok(); }
+            throw new Exception("Fail Update new user");
+        }
 
-        //    throw new Exception("Fail Update new user");
-        //}
+        [HttpPost("AddUser")]
+        public async Task<IActionResult> AddUser(Users users)
+        {
+            await _config.Users.AddAsync(users);
+            await _config.SaveChangesAsync();
+           return Ok();
+            
+          
 
-        //[HttpPost("AddUser")]
-        //public async Task<IActionResult> AddUser(Users users)
-        //{
-        //    string sql = @"Insert into Users(
-        //                FirstName,
-        //                LastName,
-        //                Email, 
-        //                Gender,
-        //                Active
-        //                ) values (
-        //                '" + users.FirstName +
-        //                "', '" + users.LastName +
-        //                "', '" + users.Email +
-        //                "', '" + users.Gender +
-        //                "', '" + users.Active +
-        //                "')";
+            throw new Exception("Fail Update new user");
+        }
 
-        //    if (await _config.ExecuteSql(sql)) { return Ok(); }
+        [HttpDelete("DeleteUser/{userId}")]
+        public async Task<IActionResult> DeleteUser(int userId)
+        {
+            Users? userDto = await _config.Users.Where(u => u.UserId == userId).FirstOrDefaultAsync();
+            if (userDto != null)
+            {
+                _config.Users.Remove(userDto);
+                if(await _config.SaveChangesAsync() > 0)
+                {
+                    return Ok();
+                }
+                throw new Exception("Fail to Delete user");
 
-        //    throw new Exception("Fail Update new user");
-        //}
-
-        //[HttpDelete("DeleteUser/{userId}")]
-        //public async Task<IActionResult> DeleteUser(int userId)
-        //{
-        //    string sql = @"Delete from Users where UserId =" + userId;
-
-        //    if (await _config.ExecuteSql(sql)) { return Ok(); }
-
-        //    throw new Exception("Fail Update new user");
-        //}
+            }
+            throw new Exception("Fail to Get user");
+        }
 
 
     }

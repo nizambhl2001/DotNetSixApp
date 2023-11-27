@@ -18,6 +18,11 @@ namespace DotNetSixApp.Data
         {
             IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
             return await connection.QueryAsync<T>(sql);
+        } 
+        public IEnumerable<T> LoadDatas<T>(string sql)
+        {
+            IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
+            return connection.Query<T>(sql);
         }
         public async Task<T> LoadDataSingle<T>(string sql)
         {
@@ -34,6 +39,20 @@ namespace DotNetSixApp.Data
         {
             IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
             return await connection.ExecuteAsync(sql);
+        }
+        public bool ExecuteSqlWithParameter(string sql, List<SqlParameter> parameters)
+        {
+            SqlCommand sqlCommand = new SqlCommand(sql);
+            foreach (SqlParameter Parameter in parameters)
+            {
+                sqlCommand.Parameters.Add(Parameter);
+            }
+            SqlConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
+            connection.Open();
+            sqlCommand.Connection = connection;
+            int rowsAffected = sqlCommand.ExecuteNonQuery();
+            connection.Close();
+            return rowsAffected > 0;
         }
     }
 }

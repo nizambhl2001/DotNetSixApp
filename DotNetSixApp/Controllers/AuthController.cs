@@ -38,14 +38,7 @@ namespace DotNetSixApp.Controllers
                     string PasswordSaltPlusString = _config.GetSection("AppSettings:PasswordKey").Value
                         + Convert.ToBase64String(PasswordSalt);
 
-                    byte[] PasswordHash = KeyDerivation.Pbkdf2(
-                        password: registraionDto.PassWord,
-                        salt: Encoding.ASCII.GetBytes(PasswordSaltPlusString),
-                        prf: KeyDerivationPrf.HMACSHA256,
-                        iterationCount: 1000000,
-                        numBytesRequested: 256 / 8
-
-                        );
+                    byte[] PasswordHash = GetPaswordHash(registraionDto.PassWord, PasswordSalt);
                     string sqlAuth = @"insert into dbo.Auth ( Email, PasswordHash, PasswordSalt)values ('" + registraionDto.Email + "',@PasswordHash,@PasswordSalt)";
 
                     List<SqlParameter> sqlParameters = new List<SqlParameter>();
@@ -72,10 +65,36 @@ namespace DotNetSixApp.Controllers
         [HttpPost("LogIn")]
         public IActionResult Login(UserLogInDto userLogInDto)
         {
+            string sqlHashforAuth = @"SELECT PasswordHash, PasswordSalt FROM Auth where Email ='"+userLogInDto.Email+"'";
 
+            UserForLoginConframDto userForLoginConframDto = _dapper.LoadDataSingles<UserForLoginConframDto>(sqlHashforAuth);
+            byte[] PasswordHash = GetPaswordHash(userLogInDto.Password, userForLoginConframDto.PasswordSalt);
+
+            for(int index = 0; index < PasswordHash.Length; index++)
+            {
+                if (PasswordHash[index] != userForLoginConframDto.PasswordHash[index])
+                {
+                    return StatusCode(401,"Incorrect password");
+                }
+            }
             return Ok();
         }
 
-       
+
+
+       private byte[] GetPaswordHash(string Password, byte[] PasswordSalt)
+        {
+            string PasswordSaltPlusString = _config.GetSection("AppSettings:PasswordKey").Value
+                       + Convert.ToBase64String(PasswordSalt);
+
+               return KeyDerivation.Pbkdf2(
+                password: Password,
+                salt: Encoding.ASCII.GetBytes(PasswordSaltPlusString),
+                prf: KeyDerivationPrf.HMACSHA256,
+                iterationCount: 1000000,
+                numBytesRequested: 256 / 8
+
+                );
+        }
     }
 }

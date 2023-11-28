@@ -28,6 +28,12 @@ namespace DotNetSixApp.Data
         {
             IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
             return await connection.QuerySingleAsync<T>(sql);
+        } 
+        
+        public T LoadDataSingles<T>(string sql)
+        {
+            IDbConnection connection = new SqlConnection(_config.GetConnectionString("DeafultConnection"));
+            return connection.QuerySingle<T>(sql);
         }
 
         public async Task<bool> ExecuteSql(string sql)
